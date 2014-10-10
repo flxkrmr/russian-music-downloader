@@ -47,11 +47,18 @@ class MusicMp3_Session
 end
 
 
+##############################################################################
+#######     MAIN    ##########################################################
+##############################################################################
+
+
 if ARGV == nil
 	raise ArgumentError, "Please give me an URL!"
 end
 
 url = ARGV[0]
+
+# parse given URL
 url_edit = url
 url_edit = url_edit.sub("http://", "")
 url_edit = url_edit.sub("https://", "")
