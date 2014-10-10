@@ -52,6 +52,8 @@ end
 #######     MAIN    ##########################################################
 ##############################################################################
 
+#TODO do this in args with getopt
+thread_number_total = 3
 
 if ARGV == nil
 	raise ArgumentError, "Please give me an URL!"
@@ -72,8 +74,6 @@ unless url_edit[0] == "musicmp3.ru"
 end
 
 page = "/" + url_edit[1].split("#")[0]
-
-puts page
 
 # get page
 http = Net::HTTP.new(url_edit[0], 80)
@@ -144,10 +144,36 @@ session = MusicMp3_Session.new
 session.cookie = session_id
 
 
+# number of running threads. will be compared to thread_number_total
+thread_number = 0 
+
+# song index
 index = 1
 
-# TODO threads
+tracks_edit = tracks.dup
+
+threads = []
+while thread_number < thread_number_total
+	threads << Thread.new do
+		track = tracks_edit.shift
+		url = session.create_url(t[2], t[1]).to_s
+		file_name = artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
+		puts "Downloading \"#{file_name}\"..."
+		mp3 = URI("http://" + url)
+		mp3_data = Net::HTTP.get(mp3)
+		one_file = File.open(album_folder + "/" + file_name, "w")
+		one_file.write(mp3_data)
+		one_file.close
+		index = index + 1
+		thread_number = thread_number + 1
+	end
+end
+puts "hello"
+
+exit
+
 tracks.each do |t|
+	
 	url = session.create_url(t[2], t[1]).to_s
 	#puts t[0].to_s + ": " + url
 	file_name = artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
