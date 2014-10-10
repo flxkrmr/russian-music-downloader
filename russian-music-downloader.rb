@@ -104,6 +104,29 @@ album_name = full_title[0].sub("Listen to ", "")
 
 puts "Downloading Album \"#{album_name}\" by \"#{artist}\""
 
+# create folders
+# can't create folders with "/" in the name
+artist.sub!("/", "-")
+album_name.sub!("/", "-")
+
+unless Dir.exists? artist
+	Dir.mkdir artist
+end
+
+album_folder = artist + "/" + album_name
+
+unless Dir.exists? (album_folder)
+	Dir.mkdir (album_folder)
+else
+	# what if album already exists
+	album_num = 0
+	while Dir.exists? (album_folder + " " + album_num.to_s)
+		album_num = album_num + 1
+	end
+	album_folder = album_folder + " " + album_num.to_s
+	Dir.mkdir (album_folder)
+end
+
 # parsing songs
 track_table = page.css("tr")
 tracks = Array.new
@@ -125,15 +148,15 @@ index = 1
 # TODO threads
 tracks.each do |t|
 	url = session.create_url(t[2], t[1]).to_s
-	puts t[0].to_s + ": " + url
+	#puts t[0].to_s + ": " + url
 	file_name = artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
 	puts "Downloading \"#{file_name}\"..."
 	mp3 = URI("http://" + url)
 	mp3_data = Net::HTTP.get(mp3)
-	one_file = File.open(file_name, "w")
+	one_file = File.open(album_folder + "/" + file_name, "w")
 	one_file.write(mp3_data)
 	one_file.close
-	puts "File done"
+	#puts "File done"
 	index = index + 1
 end
 
