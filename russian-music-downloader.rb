@@ -37,11 +37,12 @@ class MusicMp3_Session
 
 	def create_url(tn, rel) # originally creates an array with all urls of the album
 		start_url = "listen.musicmp3.ru" #normally dynamic: $('.tracklist').data('url')
-		
-		#tn = "track1" # must be $track.prop('id')	
-		#cookie = "bieau2ka95f58854" # getCookie('SessionId').substring(8)) ; currently my cookie viewed in firefox
-					    # needs to be dynamic for each loaded page
-		#rel = "26e6b0df0ccebf1b" # $this.find('.js_play_btn').prop('rel')
+	
+		# code from javascript of homepage		
+		#tn =  $track.prop('id')	
+		#cookie = getCookie('SessionId').substring(8))
+		#rel =  $this.find('.js_play_btn').prop('rel')
+
 		item = start_url + "/" + boo( tn[5...tn.size] + @cookie[8...@cookie.size] ) + "/" + rel
 	end
 end
