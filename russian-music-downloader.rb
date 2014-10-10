@@ -6,10 +6,7 @@ require "nokogiri"
 class MusicMp3_Session
 	@cookie
 
-	# TODO attr whatever!
-	def set_cookie(c)
-		@cookie = c
-	end
+	attr_accessor :cookie
 
 	def boo(d)
 		a = 1234554321
@@ -50,10 +47,28 @@ class MusicMp3_Session
 end
 
 
+if ARGV == nil
+	raise ArgumentError, "Please give me an URL!"
+end
+
+url = ARGV[0]
+url_edit = url
+url_edit = url_edit.sub("http://", "")
+url_edit = url_edit.sub("https://", "")
+url_edit = url_edit.sub("www.", "")
+url_edit = url_edit.split("/")
+
+# won't accept different pages than these:
+unless url_edit[0] == "musicmp3.ru"
+	raise ArgumentError, "I can only download from \"musicmp3.ru\""
+end
+
+page = "/" + url_edit[1].split("#")[0]
+
+puts page
+
 # get page
-http = Net::HTTP.new("musicmp3.ru", 80)
-page = "/artist_weezer__album_everything-will-be-alright-in-the-end.html"
-artist = "Weezer" # TODO get this from html
+http = Net::HTTP.new(url_edit[0], 80)
 
 http_response = http.get(page)
 
@@ -70,26 +85,35 @@ unless all_cookies != nil
 end
 
 # TODO dirty code..fix this!
+# get session id from cookies
 session_id = all_cookies[0].split("; ")[0].split("=")[1]
 
-
+# parsing artist and album name
 page = Nokogiri::HTML(http_response.body)
 
+full_title = page.css("title").text.split(" - ")
+artist = full_title[1]
+album_name = full_title[0].sub("Listen to ", "")
+
+puts "Downloading Album \"#{album_name}\" by \"#{artist}\""
+
+# parsing songs
 track_table = page.css("tr")
 tracks = Array.new
 
 track_table.each do |track|
 	track_rel = track.css("a[title='Play track']")[0]["rel"]
 	track_name = track.css("span[itemprop='name']")[0].text
+	track_name.sub!("/", "-")
 	track_id = track["id"]
 	tracks << [track_name, track_rel, track_id]
 end
 
 session = MusicMp3_Session.new
-session.set_cookie(session_id)
+session.cookie = session_id
+
 
 index = 1
-
 
 # TODO threads
 tracks.each do |t|
