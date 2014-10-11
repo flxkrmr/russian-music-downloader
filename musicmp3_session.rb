@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+##!/usr/bin/env ruby
 
 require "net/http"
 require "nokogiri"
@@ -160,7 +160,8 @@ end
 #######     MAIN    ##########################################################
 ##############################################################################
 
-
+#TODO add console support
+=begin
 if ARGV == nil
 	raise ArgumentError, "Please give me an URL!"
 end
@@ -173,4 +174,4 @@ puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\""
 
 session.download_songs
 exit
-
+=end
