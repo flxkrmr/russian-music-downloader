@@ -10,7 +10,8 @@ class MusicMp3_Session
 	@artist
 	@tracks
 
-	attr_reader :cookie, :url, :artist, :album_name
+	attr_reader :cookie, :url, :artist, 
+	            :album_name, :tracks
 
 	def boo(d)
 		a = 1234554321
