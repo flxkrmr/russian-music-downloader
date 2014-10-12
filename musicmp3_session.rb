@@ -115,6 +115,46 @@ class MusicMp3_Session
 		end
 
 	end
+	
+	# download song with given index
+	def download_song(index)
+		t = tracks[index]
+		url = create_url(t[2], t[1]).to_s
+		file_name = @artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
+		mp3 = URI("http://" + url)
+		mp3_data = Net::HTTP.get(mp3)
+		one_file = File.open(@album_folder + "/" + file_name, "w")
+		one_file.write(mp3_data)
+		one_file.close
+	end	
+
+	# prepare environment for download_song()
+	def prepare_song_download
+		# create folders
+		# can't create folders with "/" in the name
+		artist = @artist.sub("/", "-")
+		album_name = @album_name.sub("/", "-")
+
+		unless Dir.exists? artist
+			Dir.mkdir artist
+		end
+
+		@album_folder = artist + "/" + album_name
+
+		unless Dir.exists? (@album_folder)
+			Dir.mkdir (@album_folder)
+		else
+			# what if album already exists
+			album_num = 1
+			while Dir.exists? (@album_folder + " " + album_num.to_s)
+				album_num = album_num + 1
+			end
+			@album_folder = @album_folder + " " + album_num.to_s
+			Dir.mkdir (@album_folder)
+		end
+	end
+
+	# download all songs, older function	
 	def download_songs
 		# create folders
 		# can't create folders with "/" in the name
