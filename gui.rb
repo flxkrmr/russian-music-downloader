@@ -85,9 +85,10 @@ def b_open
 
 	# add tracks to gui
 	track_num = 1
+	$song_labels = []
 	$session.tracks.each { |t|
 		str = track_num.to_s + " - " + t[0]
-		Tk::Tile::Label.new($tracks_content) {
+		$song_labels << Tk::Tile::Label.new($tracks_content) {
 			text str
 		}.grid(:column => 0, :row => track_num-1, :sticky => 'w')
 		track_num = track_num + 1
@@ -95,17 +96,25 @@ def b_open
 end
 
 def b_download
-	puts "called b_download"
+	puts "called b_download!"
 
 	$btn_download.state("disabled")
 	$btn_open.state("disabled")
 
-	t = Thread.new {$session.download_songs}
-	t.join
+	$session.prepare_song_download
+	song_num = $session.tracks.size	
 
-	$btn_download.state("!disabled")
-	$btn_open.state("!disabled")
-	
+	Thread.new do
+		(0..song_num).each do |i|
+			$song_labels[i].foreground = "blue"
+			$session.download_song(i)
+			$song_labels[i].foreground = "black"
+		end
+		$btn_download.state("!disabled")
+		$btn_open.state("!disabled")
+	end
+	#t = Thread.new {$session.download_song}
+#	t.join
 end
 
 # open GUI
