@@ -120,7 +120,7 @@ class MusicMp3_Session
 	def download_song(index)
 		t = tracks[index]
 		url = create_url(t[2], t[1]).to_s
-		file_name = @artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
+		file_name = @artist + " - " + ("%02d" % (index + 1)) + " - " + t[0] + ".mp3"
 		mp3 = URI("http://" + url)
 		mp3_data = Net::HTTP.get(mp3)
 		one_file = File.open(@album_folder + "/" + file_name, "w")
