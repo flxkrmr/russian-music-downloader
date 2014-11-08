@@ -131,14 +131,22 @@ def b_open
 	track_num = 1
 
 	$song_labels = []
+#	$song_checkbox = []
 
 	$session.tracks.each { |t|
 		str = track_num.to_s + " - " + t[0]
 		$song_labels << Tk::Tile::Label.new($tracks_content) {
 			text str
 		}.grid(:column => 0, :row => track_num-1, :sticky => 'w')
+
+#		$song_checkbox << Tk::Tile::CheckButton.new($tracks_content) {
+#		}.grid(:column => 1, :row => track_num-1, :sticky => 'w')
+		
+
 		track_num = track_num + 1
 	}
+	
+#	$song_checkbox[3].variable = 1
 end
 
 
