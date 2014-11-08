@@ -53,7 +53,8 @@ class MusicMp3_Session
 
 	def download_page(url)
 		unless url.is_a? String
-			raise ArgumentError, "url must be a string"
+			#raise ArgumentError, "url must be a string"
+			return "url must be a string"
 		end
 
 		@url = url
@@ -67,7 +68,8 @@ class MusicMp3_Session
 
 		# won't accept different pages than these:
 		unless url_edit[0] == "musicmp3.ru"
-			raise ArgumentError, "I can only download from \"musicmp3.ru\""
+			#raise ArgumentError, "I can only download from \"musicmp3.ru\""
+			return "Only URLs from \"musicmp3.ru\" are supported"
 		end
 
 		page = "/" + url_edit[1].split("#")[0]
@@ -78,16 +80,17 @@ class MusicMp3_Session
 		http_response = http.get(page)
 
 		unless http_response.code == "200"
-			#TODO raise error
-			puts "Couldn't load page, response " + http_response.code.to_s
-			exit
+			#puts "Couldn't load page, response " + http_response.code.to_s
+			#exit
+			return "Couldn't load page, response " + http_response.code.to_s
 		end
 
 		all_cookies = http_response.get_fields("set-cookie")
 
 		unless all_cookies != nil
-			puts "No Cookies on received"
-			exit
+			#puts "No Cookies on received"
+			#exit
+			return "No Cookies on received"
 		end
 
 		# TODO dirty code..fix this!
@@ -113,7 +116,8 @@ class MusicMp3_Session
 			track_id = track["id"]
 			@tracks << [track_name, track_rel, track_id]
 		end
-
+		
+		return ""
 	end
 	
 	# download song with given index

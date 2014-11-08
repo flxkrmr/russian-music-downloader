@@ -3,8 +3,6 @@
 require "tk"
 require "tkextlib/tkimg" 	# to open jpg images
 
-
-
 load "musicmp3_session.rb"
 
 ################### GUI #########################################
@@ -12,13 +10,15 @@ load "musicmp3_session.rb"
 main_win = TkRoot.new {	title "Russian Music Downloader" }
 $session = MusicMp3_Session.new
 
-# full frame
+
+### full frame ###
 content = Tk::Tile::Frame.new(main_win) { padding "3 3 12 12" }.grid(:sticky => 'nsew')
 # frame will expand on window resize
 TkGrid.columnconfigure main_win, 0, :weight => 1
 TkGrid.rowconfigure main_win, 0, :weight => 1
 
-# upper frame
+
+### upper frame ###
 u_content = Tk::Tile::Frame.new(content) { padding "3 3 12 12" }.grid(:sticky => 'nsew')
 TkGrid.columnconfigure content, 0, :weight => 1
 TkGrid.rowconfigure content, 0, :weight => 1
@@ -30,12 +30,14 @@ Tk::Tile::Label.new(u_content) { text "URL:" }.grid( :column => 0, :row => 0, :s
 
 TkWinfo.children(u_content).each { |w| TkGrid.configure w, :padx => 5, :pady => 5 }
 
-# lower frame
+
+### lower frame ###
 l_content = Tk::Tile::Frame.new(content) { padding "3 3 12 12" }.grid(:sticky => 'nsew')
 TkGrid.columnconfigure content, 0, :weight => 1
 TkGrid.rowconfigure content, 0, :weight => 1
 
-# cover preview
+
+### cover preview ###
 $cover_content = Tk::Tile::Frame.new(l_content) { padding "3 3 12 12" }.grid( :column => 1, :row => 0)
 TkGrid.columnconfigure content, 0, :weight => 1
 TkGrid.rowconfigure content, 0, :weight => 1
@@ -45,12 +47,13 @@ Tk::Tile::Frame.new($cover_content) {
 }.grid( :column => 0, :row => 2, :sticky => 'w' )
 #album_cover = TkPhotoImage.new( open("album_cover.jpg", "rb").read)
 
-# title list with check boxes
+
+### title list with check boxes ###
 $tracks_content = Tk::Tile::Frame.new(l_content) { padding "3 3 12 12" }.grid( :column => 2, :row => 0)
 TkGrid.columnconfigure content, 0, :weight => 1
 TkGrid.rowconfigure content, 0, :weight => 1
 
-# buttons
+### buttons ###
 button_content = Tk::Tile::Frame.new(l_content) { padding "3 3 12 12" }.grid( :column => 3, :row => 0)
 TkGrid.columnconfigure content, 0, :weight => 1
 TkGrid.rowconfigure content, 0, :weight => 1
@@ -73,10 +76,21 @@ TkWinfo.children(l_content).each { |w| TkGrid.configure w, :padx => 5, :pady => 
 url_entry.focus
 
 
+### functions ###
 def b_open
-	puts "called b_open"
+	ret = $session.download_page($url.to_s)
 
-	$session.download_page($url.to_s)	
+	# error in download_page()
+	unless ret == ""
+		msgBox = Tk.messageBox(
+			'type'    => "ok",  
+			'icon'    => "info", 
+			'title'   => "Error",
+			'message' => ret
+		)
+		return
+	end
+
 	$btn_download.state("!disabled") 
 
 	# add artist and album name to gui
@@ -84,6 +98,7 @@ def b_open
 	Tk::Tile::Label.new($cover_content) { text $session.album_name }.grid(:column => 0, :row => 1, :sticky => 'w')
 
 	# add tracks to gui
+	#TODO checkboxes
 	track_num = 1
 	$song_labels = []
 	$session.tracks.each { |t|
@@ -95,25 +110,27 @@ def b_open
 	}
 end
 
-def b_download
-	puts "called b_download!"
 
+def b_download
 	$btn_download.state("disabled")
 	$btn_open.state("disabled")
 
 	$session.prepare_song_download
 	song_num = $session.tracks.size	
 
+	puts song_num
+
 	Thread.new do
-		(0..song_num).each do |i|
+		(0...song_num).each do |i|
 			$song_labels[i].foreground = "blue"
 			$session.download_song(i)
 			$song_labels[i].foreground = "black"
 		end
+		puts "finished downloading"
 		$btn_download.state("!disabled")
 		$btn_open.state("!disabled")
 	end
-	#t = Thread.new {$session.download_song}
+
 #	t.join
 end
 
