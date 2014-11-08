@@ -94,13 +94,24 @@ def b_open
 	$btn_download.state("!disabled") 
 
 	# add artist and album name to gui
-	Tk::Tile::Label.new($cover_content) { text $session.artist }.grid(:column => 0, :row => 0, :sticky => 'w')
-	Tk::Tile::Label.new($cover_content) { text $session.album_name }.grid(:column => 0, :row => 1, :sticky => 'w')
+	if $artist_label != nil or $album_name_label != nil
+		$artist_label.text("")
+		$album_name_label.text("")
+	end
+		
+	$artist_label = Tk::Tile::Label.new($cover_content) { text $session.artist }.grid(:column => 0, :row => 0, :sticky => 'w')
+	$album_name_label = Tk::Tile::Label.new($cover_content) { text $session.album_name }.grid(:column => 0, :row => 1, :sticky => 'w')
 
 	# add tracks to gui
 	#TODO checkboxes
+	if $song_labels != nil
+		$song_labels.each{ |s| s.text("") }
+	end
+
 	track_num = 1
+
 	$song_labels = []
+
 	$session.tracks.each { |t|
 		str = track_num.to_s + " - " + t[0]
 		$song_labels << Tk::Tile::Label.new($tracks_content) {
@@ -118,8 +129,6 @@ def b_download
 	$session.prepare_song_download
 	song_num = $session.tracks.size	
 
-	puts song_num
-
 	Thread.new do
 		(0...song_num).each do |i|
 			$song_labels[i].foreground = "blue"
@@ -130,8 +139,6 @@ def b_download
 		$btn_download.state("!disabled")
 		$btn_open.state("!disabled")
 	end
-
-#	t.join
 end
 
 # open GUI
