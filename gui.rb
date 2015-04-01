@@ -23,7 +23,7 @@
 require "tk"
 require "tkextlib/tkimg" 	# to open jpg images
 
-load "musicmp3_session.rb"
+load "~/Coding/ruby/russian-music-downloader/musicmp3_session.rb"
 
 ################### GUI #########################################
 

@@ -1,6 +1,4 @@
-##!/usr/bin/env ruby
-
-
+#!/usr/bin/env ruby
 #
 # Copyright (C) 2014 Felix Kramer. All rights reserved.
 #
@@ -72,6 +70,7 @@ class MusicMp3_Session
 		item = start_url + "/" + boo( tn[5...tn.size] + @cookie[8...@cookie.size] ) + "/" + rel
 	end
 
+        # TODO rename to init_download
 	def download_page(url)
 		unless url.is_a? String
 			#raise ArgumentError, "url must be a string"
@@ -227,7 +226,6 @@ end
 ##############################################################################
 
 #TODO add console support
-=begin
 if ARGV == nil
 	raise ArgumentError, "Please give me an URL!"
 end
@@ -240,4 +238,3 @@ puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\""
 
 session.download_songs
 exit
-=end
