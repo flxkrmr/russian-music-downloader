@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
-
 #
-# Copyright (C) 2014 Felix Kramer. All rights reserved.
+# Copyright (C) 2015 Felix Kramer. All rights reserved.
 #
 # felixkramerroki@aol.com
 #
