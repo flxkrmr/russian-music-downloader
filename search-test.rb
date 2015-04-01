@@ -45,24 +45,33 @@ class MusicSearcher
 			return "Couldn't load page, response " + http_response.code.to_s
 		end
 
-    #TODO: parse http_response.body
     html = Nokogiri::HTML(http_response.body)
 
-    albums_unp = html.css("a[class='tags__item__link']")
+    artists_unp = html.css("li[class='artist_preview']")
     albums = []
 
-    if albums_unp.empty?
+    #TODO test this
+    if artists_unp.empty?
       puts "nothing found"
       exit
     end
 
-    albums_unp.each do |a|
-      albums << {"name" => a.content, "link" => a['href']}
-      a.text
+    artists_unp.each do |art|
+      artist = art.css("a[class='artist_preview__title']").text
+      art.css("a[class='tags__item__link']").each do |alb|
+        albums << { "artist" => artist,
+                    "name" => alb.content,
+                    "link" => alb['href'] }
+      end
     end
 
     #print menu
+    current_artist = ""
     albums.each_with_index do |a, i|
+      unless current_artist == a["artist"]
+        current_artist = a["artist"]
+        puts "+++ #{current_artist} +++"
+      end
       puts "[#{i.to_s.yellow}] - #{a["name"]}"
     end
   end
