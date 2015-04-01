@@ -29,7 +29,7 @@ class MusicMp3_Session
 	@artist
 	@tracks
 
-	attr_reader :cookie, :url, :artist, 
+	attr_reader :cookie, :url, :artist,
 	            :album_name, :tracks
 
 	def boo(d)
@@ -225,8 +225,7 @@ end
 #######     MAIN    ##########################################################
 ##############################################################################
 
-#TODO add console support
-if ARGV == nil
+if ARGV[0].nil?
 	raise ArgumentError, "Please give me an URL!"
 end
 
