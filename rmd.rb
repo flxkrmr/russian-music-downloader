@@ -27,10 +27,11 @@ require "colorize"
 URL_BASE = "musicmp3.ru"
 URL_LISTEN_BASE = "listen.musicmp3.ru"
 
-class MusicSearcher
+class UserInterface
   URL_PAGE = "/search.html?text="
 
-  def search(s)
+
+  def searchArtists(s)
     # get page and check return code
     http = Net::HTTP.new(URL_BASE, 80)
     # make the search string URL save
@@ -90,19 +91,6 @@ class MusicMp3Session
 
   attr_reader :cookie, :url, :artist,
               :album_name, :tracks
-
-
-  #todo no function needed here
-  def create_url(tn, rel) # originally creates an array with all urls of the album
-    #start_url = "listen.musicmp3.ru" #normally dynamic: $('.tracklist').data('url')
-
-    # code from javascript of homepage
-    #tn =  $track.prop('id')
-    #cookie = getCookie('SessionId').substring(8))
-    #rel =  $this.find('.js_play_btn').prop('rel')
-
-    item = URL_LISTEN_BASE + "/" + boo( tn[5...tn.size] + @cookie[8...@cookie.size] ) + "/" + rel
-  end
 
   def download_page(url)
     unless url.is_a? String
@@ -220,48 +208,6 @@ class MusicMp3Session
       Dir.mkdir (@album_folder)
     end
   end
-=begin
-  # download all songs, older function
-  def download_songs
-    # create folders
-    # can't create folders with "/" in the name
-    artist = @artist.sub("/", "-")
-    album_name = @album_name.sub("/", "-")
-
-    unless Dir.exists? artist
-      Dir.mkdir artist
-    end
-
-    album_folder = artist + "/" + album_name
-
-    unless Dir.exists? (album_folder)
-      Dir.mkdir (album_folder)
-    else
-      # what if album already exists
-      album_num = 1
-      while Dir.exists? (album_folder + " " + album_num.to_s)
-        album_num = album_num + 1
-      end
-      album_folder = album_folder + " " + album_num.to_s
-      Dir.mkdir (album_folder)
-    end
-    index = 1
-
-    # TODO threads
-    @tracks.each do |t|
-      url = create_url(t[2], t[1]).to_s
-      #puts t[0].to_s + ": " + url
-      file_name = @artist + " - " + ("%02d" % index) + " - " + t[0] + ".mp3"
-      puts "Downloading \"#{file_name}\"..."
-      mp3 = URI("http://" + url)
-      mp3_data = Net::HTTP.get(mp3)
-      one_file = File.open(album_folder + "/" + file_name, "w")
-      one_file.write(mp3_data)
-      one_file.close
-      index = index + 1
-    end
-  end
-=end
 
   private
 
