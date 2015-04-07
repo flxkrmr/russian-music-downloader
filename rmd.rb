@@ -22,8 +22,6 @@
 require "net/http"
 require "nokogiri"
 require "optparse"
-#TODO disable with argument
-require "colorize"
 
 URL_BASE = "musicmp3.ru"
 URL_LISTEN_BASE = "listen.musicmp3.ru"
@@ -42,6 +40,7 @@ class UserInterface
       @options[:colorize] = false
       opts.on( '-c', "--colorize", "Generate coloured output in shell") do
         @options[:colorize] = true
+        require "colorize"
       end
 
       @options[:url] = nil
@@ -120,8 +119,15 @@ class UserInterface
         puts "+++ #{current_artist} +++"
       end
       #TODO put this in if sequence to exclude String.yellow if needed
-      puts "[#{i.to_s.yellow}] - #{a["name"]}"
+      if options[:colorize]
+        puts "[#{i.to_s.yellow}] - #{a["name"]}"
+      else
+        puts "[#{i.to_s}] - #{a["name"]}"
+      end
     end
+
+    choice_index = STDIN.gets
+    URL_BASE + albums[choice_index.to_i]["link"]
   end
 end
 
@@ -291,26 +297,31 @@ end
 ui = UserInterface.new
 ui.parseArgv
 
-unless ui.options[:url].nil?
-  url = ui.options[:url]
-  session = MusicMp3Session.new
-  session.download_page(url)
-  session.prepare_songs_download
-  puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\":"
-
-  session.tracks.each_with_index do |t, i|
-    # show the user that something is going on
-    puts "Downloading #{"%02d" % (i + 1)} - \"#{t["name"]}\"..."
-    session.download_song(i)
-  end
-
-  exit
+unless ui.options[:search].nil?
+  url = ui.searchArtists
 end
 
-unless ui.options[:search].nil?
-  ui.searchArtists
+unless ui.options[:url].nil?
+  url = ui.options[:url]
+end
 
-  exit
+session = MusicMp3Session.new
+session.download_page(url)
+session.prepare_songs_download
+if ui.options[:colorize]
+  puts "Downloading Album \"#{session.album_name.green}\" by \"#{session.artist}\":"
+else
+  puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\":"
+end
+
+session.tracks.each_with_index do |t, i|
+  # show the user that something is going on
+  if ui.options[:colorize]
+    puts "Downloading #{"%02d".yellow % (i + 1)} - \"#{t["name"]}\"..."
+  else
+    puts "Downloading #{"%02d" % (i + 1)} - \"#{t["name"]}\"..."
+  end
+  session.download_song(i)
 end
 
 exit
