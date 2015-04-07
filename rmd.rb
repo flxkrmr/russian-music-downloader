@@ -21,6 +21,7 @@
 
 require "net/http"
 require "nokogiri"
+require "optparse"
 #TODO disable with argument
 require "colorize"
 
@@ -30,12 +31,54 @@ URL_LISTEN_BASE = "listen.musicmp3.ru"
 class UserInterface
   URL_PAGE = "/search.html?text="
 
+  attr_reader :options
 
-  def searchArtists(s)
+  def parseArgv
+    @options = {}
+
+    optparse = OptionParser.new do |opts|
+      opts.banner = "Usage: blablba"
+
+      @options[:colorize] = false
+      opts.on( '-c', "--colorize", "Generate coloured output in shell") do
+        @options[:colorize] = true
+      end
+
+      @options[:url] = nil
+      opts.on( "-u", "--url URL", "Download directly from URL") do |url|
+        unless @options[:search].nil?
+          puts "-u and --url can only be used without -s and --search"
+          puts opts
+          exit
+        end
+        @options[:url] = url
+      end
+
+      @options[:search] = nil
+      opts.on( "-s", "--search SEARCH", "Search an Album") do |search|
+        unless @options[:url].nil?
+          puts "-s and --search can only be used without -u and --url"
+          puts opts
+          exit
+        end
+        @options[:search] = search
+      end
+
+      opts.on( "-h", "--help", "Print this help screen") do
+        puts opts
+        exit
+      end
+    end
+
+    optparse.parse!
+  end
+
+
+  def searchArtists
     # get page and check return code
     http = Net::HTTP.new(URL_BASE, 80)
     # make the search string URL save
-    s_urlsave = URI.escape(s.gsub(" ","+"))
+    s_urlsave = URI.escape(options[:search].gsub(" ","+"))
     http_response = http.get(URL_PAGE + s_urlsave)
     unless http_response.code == "200"
       puts "Couldn't load page, response " + http_response.code.to_s
@@ -245,21 +288,29 @@ end
 #######     MAIN    ##########################################################
 ##############################################################################
 
-if ARGV[0].nil?
-  raise ArgumentError, "Please give me an URL!"
+ui = UserInterface.new
+ui.parseArgv
+
+unless ui.options[:url].nil?
+  url = ui.options[:url]
+  session = MusicMp3Session.new
+  session.download_page(url)
+  session.prepare_songs_download
+  puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\":"
+
+  session.tracks.each_with_index do |t, i|
+    # show the user that something is going on
+    puts "Downloading #{"%02d" % (i + 1)} - \"#{t["name"]}\"..."
+    session.download_song(i)
+  end
+
+  exit
 end
 
-url = ARGV[0]
-session = MusicMp3Session.new
-session.download_page(url)
-session.prepare_songs_download
-puts "Downloading Album \"#{session.album_name}\" by \"#{session.artist}\":"
+unless ui.options[:search].nil?
+  ui.searchArtists
 
-session.tracks.each_with_index do |t, i|
-  # show the user that something is going on
-  puts "Downloading #{"%02d" % (i + 1)} - \"#{t["name"]}\"..."
-  session.download_song(i)
+  exit
 end
-
 
 exit
